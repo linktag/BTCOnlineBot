@@ -23,9 +23,9 @@ namespace BTCOnline
             Console.WriteLine("#################################################");
             Console.WriteLine("#	BTCBot, by LinkTag17 on Nulled		#");
             Console.WriteLine("#################################################\n\n");
-            string idt;
-            string pass;
-            string key;
+            string idt = "0";
+            string pass = "0";
+            string key = "0";
 
             if (args.Count() == 0)
             {
@@ -62,8 +62,8 @@ namespace BTCOnline
                 }
             }
 
-            //DemarrerBot(idt, pass);
-            Console.WriteLine(ResoudreCaptcha(new Bitmap("transfo1\\52.png")));
+            DemarrerBot(idt, pass);
+            //Console.WriteLine(ResoudreCaptcha(new Bitmap("transfo1\\27.png")));
             //SupprimerTraits(new Bitmap("finale_image.png")).Save("sans_traits.png", System.Drawing.Imaging.ImageFormat.Png);
             //Console.WriteLine(OCR(new Bitmap("transformee.png")));
             //Console.WriteLine(OCRItalien(new Bitmap("transfo2\\11.png")));
@@ -264,11 +264,24 @@ namespace BTCOnline
 
             // Copy the RGB values into the array.
             Marshal.Copy(ptr, rgbValues, 0, numBytes);
-           //Console.WriteLine("({0}, {1}, {2})", GetPixel(rgbValues, captcha.Width, captcha.Width - 1, captcha.Height - 1)[0].ToString(), GetPixel(rgbValues, captcha.Width, captcha.Width - 1, captcha.Height - 1)[1].ToString(), GetPixel(rgbValues, captcha.Width, captcha.Width - 1, captcha.Height - 1)[2].ToString());
 
-            if (GetPixel(rgbValues, captcha.Width, captcha.Width-1, captcha.Height-1) == new byte[] {50,121,230})
+            //On recompile l'image
+            // Copy the RGB values back to the bitmap
+            Marshal.Copy(rgbValues, 0, ptr, numBytes);
+
+            //throw new NotImplementedException();
+
+            // Unlock the bits.
+            captcha.UnlockBits(bmpData);
+
+
+            //Console.WriteLine("({0}, {1}, {2})", GetPixel(rgbValues, captcha.Width, captcha.Width - 1, captcha.Height - 1)[0].ToString(), GetPixel(rgbValues, captcha.Width, captcha.Width - 1, captcha.Height - 1)[1].ToString(), GetPixel(rgbValues, captcha.Width, captcha.Width - 1, captcha.Height - 1)[2].ToString());
+            byte[] detectionOrange = new byte[3] { 50, 121, 230 };
+
+            if (GetPixel(rgbValues, captcha.Width, captcha.Width-1, captcha.Height-1)[0] == detectionOrange[0] && GetPixel(rgbValues, captcha.Width, captcha.Width - 1, captcha.Height - 1)[1] == detectionOrange[1] && GetPixel(rgbValues, captcha.Width, captcha.Width - 1, captcha.Height - 1)[2] == detectionOrange[2])
             {
                 Console.WriteLine("Orange Captcha detected. Deleting orange");
+                captcha = SupprimerFond(captcha, GetPixel(rgbValues, captcha.Width, captcha.Width-1, captcha.Height/2), 15);
             }
 
             return captcha;
@@ -310,11 +323,12 @@ namespace BTCOnline
             Console.WriteLine("Editing Captcha to make it easier to read");
 
             //On effectue la suppression du fond
-            captcha = SupprimerFond(captcha);
+            captcha = SupprimerFond(captcha, 5);
 
             //On l'améliore encore
-            //captcha = AmeliorationsSupplementaires(captcha);
             captcha = CaptchaOrangeEtCroix(captcha);
+            captcha = AmeliorationsSupplementaires(captcha);
+
 
             //Utilisation de l'OCR
             Console.WriteLine("Use OCR to read captcha");
@@ -514,8 +528,7 @@ namespace BTCOnline
             return captcha;
         }
 
-
-        private static Bitmap SupprimerFond(Bitmap captcha)
+        private static Bitmap SupprimerFond(Bitmap captcha, byte[] PixelRef, int N)
         {
             //On convertir l'image en un tableau
             Rectangle rect = new Rectangle(0, 0, captcha.Width, captcha.Height);
@@ -535,13 +548,13 @@ namespace BTCOnline
             // blue value for every other pixel in the the bitmap.
 
             //On creer un tableau du meme genre
-            byte[] tableau = new byte[captcha.Width*captcha.Height];
+            byte[] tableau = new byte[captcha.Width * captcha.Height];
             for (int k = 0; k < tableau.Count(); k++)
                 tableau[k] = 0;
-            tableau[(int)(captcha.Width/ 2)] = 1;
+            tableau[(int)(captcha.Width / 2)] = 1;
 
-            int n = 5;
-            byte[] pixelRef = GetPixel(rgbValues, captcha.Width, 40, 1);
+            int n = N;
+            byte[] pixelRef = PixelRef;
             int[] alpha = new int[3] { n, n, n };
             int[] beta = new int[3] { n, n, n };
 
@@ -629,81 +642,153 @@ namespace BTCOnline
                 }
             }
 
-            //Deux méthodes possible : première efficace mais tres lente, deuxieme moins efficace mais rapide
-            /*
-            int ancienNbPixelBlanc = 0;
-            int nouveauNbPixelBlanc = 1;
-            while (ancienNbPixelBlanc != nouveauNbPixelBlanc)
+
+            //On peut alors remplir l'image de blanc la ou necessaire
+            for (int j = 0; j < captcha.Height; j += 1)
             {
-                ancienNbPixelBlanc = nouveauNbPixelBlanc;
-                for (int j = 0; j < captcha.Height; j += 1)
+                for (int i = 0; i < captcha.Width; i += 1)
                 {
-                    for (int i = 0; i < captcha.Width; i += 1)
+                    if (tableau[j * captcha.Width + i] == 1)
                     {
-                        if (tableau[j*captcha.Width+i] == 1)
-                        {
+                        rgbValues[4 * (captcha.Width * j + i)] = 255;
+                        rgbValues[4 * (captcha.Width * j + i) + 1] = 255;
+                        rgbValues[4 * (captcha.Width * j + i) + 2] = 255;
+                    }
+                    else if (rgbValues[4 * (captcha.Width * j + i)] > 180 && rgbValues[4 * (captcha.Width * j + i) + 1] > 180 && rgbValues[4 * (captcha.Width * j + i) + 2] > 180)
+                    {
+                        rgbValues[4 * (captcha.Width * j + i)] = 255;
+                        rgbValues[4 * (captcha.Width * j + i) + 1] = 255;
+                        rgbValues[4 * (captcha.Width * j + i) + 2] = 255;
+                    }
+                }
+            }
 
-                            for (int b = 0; b < captcha.Height; b += 1)
-                            {
-                                for (int a = 0; a < captcha.Width; a += 1)
-                                {
-                                    if (tableau[b* captcha.Width + a] != 1)
-                                    {
-                                        if (Compare(rgbValues[4 * (captcha.Width * j + i)], rgbValues[4 * (captcha.Width * j + i) + 1], rgbValues[4 * (captcha.Width * j + i) + 2], rgbValues[4 * (captcha.Width * b + a)], rgbValues[4 * (captcha.Width * b + a) + 1], rgbValues[4 * (captcha.Width * b + a) + 2], 5))
-                                        {
-                                            tableau[b * captcha.Width + a] = 1;
-                                            nouveauNbPixelBlanc++;
-                                        }
-                                    }
-                                }
-                            }
+            // Copy the RGB values back to the bitmap
+            Marshal.Copy(rgbValues, 0, ptr, numBytes);
 
+            //throw new NotImplementedException();
 
+            // Unlock the bits.
+            captcha.UnlockBits(bmpData);
 
-                            //Première méthode utilisé : Rapide mais laisse des fonds de couleurs
-                            
-                            //HAUT
-                            if (j > 0)
-                                if (tableau[(j - 1) * captcha.Width + i] != 1)
-                                    if (Compare(rgbValues[4 * (captcha.Width * j + i)], rgbValues[4 * (captcha.Width * j + i) + 1], rgbValues[4 * (captcha.Width * j + i) + 2], rgbValues[4 * (captcha.Width * (j-1) + i)], rgbValues[4 * (captcha.Width * (j-1) + i) + 1], rgbValues[4 * (captcha.Width * (j-1) + i) + 2], 20))
-                                    {
-                                        tableau[(j - 1) * captcha.Width + i] = 1;
-                                        nouveauNbPixelBlanc += 1;
-                                    }
-                            //BAS
-                            if (j < captcha.Height-1)
-                                if (tableau[(j + 1) * captcha.Width + i] != 1)
-                                    if (Compare(rgbValues[4 * (captcha.Width * j + i)], rgbValues[4 * (captcha.Width * j + i) + 1], rgbValues[4 * (captcha.Width * j + i) + 2], rgbValues[4 * (captcha.Width * (j + 1) + i)], rgbValues[4 * (captcha.Width * (j + 1) + i) + 1], rgbValues[4 * (captcha.Width * (j + 1) + i) + 2], 20))
-                                    {
-                                        tableau[(j + 1) * captcha.Width + i] = 1;
-                                        nouveauNbPixelBlanc += 1;
-                                    }
-
-                            //GAUCHE
-                            if (i > 0)
-                                if (tableau[j * captcha.Width + i - 1] != 1)
-                                    if (Compare(rgbValues[4 * (captcha.Width * j + i)], rgbValues[4 * (captcha.Width * j + i) + 1], rgbValues[4 * (captcha.Width * j + i) + 2], rgbValues[4 * (captcha.Width * j + i - 1)], rgbValues[4 * (captcha.Width * j + i - 1) + 1], rgbValues[4 * (captcha.Width * j + i - 1) + 2], 20))
-                                    {
-                                        tableau[j * captcha.Width + i - 1] = 1;
-                                        nouveauNbPixelBlanc += 1;
-                                    }
-
-                            //DROITE
-                            if (i < captcha.Width-1)
-                                if (tableau[j * captcha.Width + i + 1] != 1)
-                                    if (Compare(rgbValues[4 * (captcha.Width * j + i)], rgbValues[4 * (captcha.Width * j + i) + 1], rgbValues[4 * (captcha.Width * j + i) + 2], rgbValues[4 * (captcha.Width * j + i + 1)], rgbValues[4 * (captcha.Width * j + i + 1) + 1], rgbValues[4 * (captcha.Width * j + i + 1) + 2], 20))
-                                    {
-                                        tableau[j * captcha.Width + i + 1] = 1;
-                                        nouveauNbPixelBlanc += 1;
-                                    }
+            return captcha;
         }
 
-        
-    }
-                }
 
+        private static Bitmap SupprimerFond(Bitmap captcha, int N)
+        {
+            //On convertir l'image en un tableau
+            Rectangle rect = new Rectangle(0, 0, captcha.Width, captcha.Height);
+            BitmapData bmpData = captcha.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+
+            // Get the address of the first line.
+            IntPtr ptr = bmpData.Scan0;
+
+            // Declare an array to hold the bytes of the bitmap.
+            int numBytes = bmpData.Stride * captcha.Height;
+            byte[] rgbValues = new byte[numBytes];
+
+            // Copy the RGB values into the array.
+            Marshal.Copy(ptr, rgbValues, 0, numBytes);
+
+            // Manipulate the bitmap, such as changing the
+            // blue value for every other pixel in the the bitmap.
+
+            //On creer un tableau du meme genre
+            byte[] tableau = new byte[captcha.Width*captcha.Height];
+            for (int k = 0; k < tableau.Count(); k++)
+                tableau[k] = 0;
+            tableau[(int)(captcha.Width/ 2)] = 1;
+
+            int n = N;
+            byte[] pixelRef = GetPixel(rgbValues, captcha.Width, 40, 1);
+            int[] alpha = new int[3] { n, n, n };
+            int[] beta = new int[3] { n, n, n };
+
+            for (int j = 0; j < captcha.Height; j++)
+            {
+                for (int i = (int)(captcha.Width / 2); i < captcha.Width; i++)
+                {
+                    if (Compare(pixelRef, GetPixel(rgbValues, captcha.Width, i, j), alpha, beta))
+                    {
+                        tableau[j * captcha.Width + i] = 1;
+                        //On adapte alpha et beta
+                        for (int k = 0; k < 3; k++)
+                        {
+                            int diff = pixelRef[k] - GetPixel(rgbValues, captcha.Width, i, j)[k];
+
+                            if (diff > 0)
+                            {
+                                if (diff + n > alpha[k])
+                                    alpha[k] = diff + n;
+                            }
+                            else
+                            {
+                                if (n - diff > beta[k])
+                                    beta[k] = n - diff;
+                            }
+                        }
+
+                    }
+                }
             }
-*/
+
+
+            for (int j = 0; j < captcha.Height; j++)
+            {
+                for (int i = (int)(captcha.Width / 2) - 1; i >= 0; i--)
+                {
+                    if (Compare(pixelRef, GetPixel(rgbValues, captcha.Width, i, j), alpha, beta))
+                    {
+                        tableau[j * captcha.Width + i] = 1;
+                        //On adapte alpha et beta
+                        for (int k = 0; k < 3; k++)
+                        {
+                            int diff = pixelRef[k] - GetPixel(rgbValues, captcha.Width, i, j)[k];
+
+                            if (diff > 0)
+                            {
+                                if (diff + n > alpha[k])
+                                    alpha[k] = diff + n;
+                            }
+                            else
+                            {
+                                if (n - diff > beta[k])
+                                    beta[k] = n - diff;
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (int j = 0; j < captcha.Height; j++)
+            {
+                for (int i = (int)(captcha.Width / 2); i < captcha.Width; i++)
+                {
+                    if (Compare(pixelRef, GetPixel(rgbValues, captcha.Width, i, j), alpha, beta))
+                    {
+                        tableau[j * captcha.Width + i] = 1;
+                        //On adapte alpha et beta
+                        for (int k = 0; k < 3; k++)
+                        {
+                            int diff = pixelRef[k] - GetPixel(rgbValues, captcha.Width, i, j)[k];
+
+                            if (diff > 0)
+                            {
+                                if (diff + n > alpha[k])
+                                    alpha[k] = diff + n;
+                            }
+                            else
+                            {
+                                if (n - diff > beta[k])
+                                    beta[k] = n - diff;
+                            }
+                        }
+
+                    }
+                }
+            }
+            
 
             //On peut alors remplir l'image de blanc la ou necessaire
             for (int j = 0; j < captcha.Height; j += 1)
