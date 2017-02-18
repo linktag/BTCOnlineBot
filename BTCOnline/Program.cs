@@ -23,6 +23,9 @@ namespace BTCOnline
             Console.WriteLine("#################################################");
             Console.WriteLine("#	BTCBot, by LinkTag17 on Nulled		#");
             Console.WriteLine("#################################################\n\n");
+            string idt;
+            string pass;
+            string key;
 
             if (args.Count() == 0)
             {
@@ -34,32 +37,32 @@ namespace BTCOnline
                 {
                     if (arg == "-h")
                     {
-
+                        Console.WriteLine("Use the following commands : ");
+                        Console.WriteLine("-h Display   help message");
+                        Console.WriteLine("-idt=<IDT>   Insert your email/identifiant for BTCOnline");
+                        Console.WriteLine("-pass=<PASSWORD>     Insert your password for BTCOnline");
+                        Console.WriteLine("-DBC=<KEY>   Insert your Death By Captcha key for ReCaptcha");
                     }
                     else if (arg.Contains("-idt="))
                     {
-
+                        idt = arg.Split('=')[1];
                     }
                     else if (arg.Contains("-pass="))
                     {
-
+                        pass = arg.Split('=')[1];
                     }
-                    else if (arg.Contains("-idtDBC="))
+                    else if (arg.Contains("-DBC="))
                     {
-
-                    }
-                    else if (arg.Contains("-mdpDBC="))
-                    {
-
+                        key = arg.Split('=')[1];
                     }
                     else
                     {
-
+                        Console.WriteLine("Error : Invalid argument " + arg);
                     }
                 }
             }
 
-            //DemarrerBot("linktag@hotmail.fr", "!phanoss1999!");
+            //DemarrerBot(idt, pass);
             Console.WriteLine(ResoudreCaptcha(new Bitmap("transfo1\\52.png")));
             //SupprimerTraits(new Bitmap("finale_image.png")).Save("sans_traits.png", System.Drawing.Imaging.ImageFormat.Png);
             //Console.WriteLine(OCR(new Bitmap("transformee.png")));
@@ -261,11 +264,14 @@ namespace BTCOnline
 
             // Copy the RGB values into the array.
             Marshal.Copy(ptr, rgbValues, 0, numBytes);
+           //Console.WriteLine("({0}, {1}, {2})", GetPixel(rgbValues, captcha.Width, captcha.Width - 1, captcha.Height - 1)[0].ToString(), GetPixel(rgbValues, captcha.Width, captcha.Width - 1, captcha.Height - 1)[1].ToString(), GetPixel(rgbValues, captcha.Width, captcha.Width - 1, captcha.Height - 1)[2].ToString());
 
-            if (GetPixel(rgbValues, captcha.Width, captcha.Width-1, captcha.Height-1) == new byte[] {0,0,0})
+            if (GetPixel(rgbValues, captcha.Width, captcha.Width-1, captcha.Height-1) == new byte[] {50,121,230})
             {
                 Console.WriteLine("Orange Captcha detected. Deleting orange");
             }
+
+            return captcha;
         }
 
 
@@ -307,13 +313,14 @@ namespace BTCOnline
             captcha = SupprimerFond(captcha);
 
             //On l'améliore encore
-            captcha = AmeliorationsSupplementaires(captcha);
+            //captcha = AmeliorationsSupplementaires(captcha);
+            captcha = CaptchaOrangeEtCroix(captcha);
 
             //Utilisation de l'OCR
             Console.WriteLine("Use OCR to read captcha");
             string captchaText = OCRItalien(captcha);
             Console.WriteLine("Captcha : {0}", captchaText);
-            //string captchaText = OCR(captcha);
+
 
             //On enregistre le captcha modifie
             captcha.Save("amelioree.png", System.Drawing.Imaging.ImageFormat.Png);

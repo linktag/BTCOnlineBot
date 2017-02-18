@@ -20,3 +20,25 @@ C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\x8
 C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\x86\Debug\AForge.xml
 C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\x86\Debug\AForge.Imaging.xml
 C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\x86\Debug\AForge.Math.xml
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\obj\x86\Debug\BTCOnline.csprojResolveAssemblyReference.cache
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\obj\x86\Debug\BTCOnline.exe
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\obj\x86\Debug\BTCOnline.pdb
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\x64\liblept172.dll
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\x64\libtesseract304.dll
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\x86\liblept172.dll
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\x86\libtesseract304.dll
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\BTCOnline.exe.config
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\BTCOnline.exe
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\BTCOnline.pdb
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\AForge.dll
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\AForge.Imaging.dll
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\AForge.Math.dll
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\Tesseract.dll
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\WebDriver.dll
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\WebDriver.Support.dll
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\AForge.xml
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\AForge.Imaging.xml
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\AForge.Math.xml
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\Tesseract.xml
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\WebDriver.xml
+C:\Users\Romain\Documents\GitHub\BTCOnlineBot\BTCOnline\bin\x86\Debug\WebDriver.Support.xml
