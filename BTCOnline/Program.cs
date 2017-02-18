@@ -62,8 +62,8 @@ namespace BTCOnline
                 }
             }
 
-            DemarrerBot(idt, pass);
-            //Console.WriteLine(ResoudreCaptcha(new Bitmap("transfo1\\27.png")));
+            //DemarrerBot(idt, pass);
+            Console.WriteLine(ResoudreCaptcha(new Bitmap("transfo1\\27.png")));
             //SupprimerTraits(new Bitmap("finale_image.png")).Save("sans_traits.png", System.Drawing.Imaging.ImageFormat.Png);
             //Console.WriteLine(OCR(new Bitmap("transformee.png")));
             //Console.WriteLine(OCRItalien(new Bitmap("transfo2\\11.png")));
@@ -397,6 +397,8 @@ namespace BTCOnline
             //segmenter.Resize(90 * 2, 40 * 3);
             //segmenter.ColorFillBlobs(30, Color.White, 58);
             segmenter.BlackAndWhite();
+            segmenter.RemoveSmallBlobs(10, 10, 10, Color.White, 5);
+            segmenter.MeanShiftFilter(1,1,1);
             return segmenter.Image;
         }
 

@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 
 namespace BTCOnline
 {
+
     class Segmenter
     {
         public Bitmap Image { get; set; }
@@ -39,6 +40,164 @@ namespace BTCOnline
             catch (Exception ex)
             {
                 Console.WriteLine("Error resizing an Image.", ex);
+            }
+        }
+
+
+        private BlobCount FloodCount(Point origin, int tolerance, int cutoff = -1, bool[,] doneChecking = null)
+        {
+            Color initialColor = Image.GetPixel(origin.X, origin.Y);
+            BitmapData bmpData = Image.LockBits(new Rectangle(0, 0, Image.Width, Image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            IntPtr Scan0 = bmpData.Scan0;
+            int count = 0;
+            Point upperLeft = origin;
+            Point lowerRight = origin;
+
+            unsafe
+            {
+                byte* scan0 = (byte*)(void*)Scan0;
+                int stride = bmpData.Stride;
+
+                if (doneChecking == null)
+                {
+                    doneChecking = new bool[Image.Width, Image.Height];
+                }
+                Queue<Point> nextPoints = new Queue<Point>();
+
+                // Fill the initial pixel
+                FloodFillPoint(scan0, stride, origin, Image.Width, Image.Height, initialColor, tolerance, Color.White, doneChecking, nextPoints, ref doneChecking, true);
+
+                // Fill pixels in the queue until the queue is empty
+                while (nextPoints.Count > 0)
+                {
+                    Point next = nextPoints.Dequeue();
+                    if (FloodFillPoint(scan0, stride, next, Image.Width, Image.Height, initialColor, tolerance, Color.White, doneChecking, nextPoints, ref doneChecking, true))
+                    {
+                        upperLeft.X = Math.Min(upperLeft.X, next.X);
+                        upperLeft.Y = Math.Min(upperLeft.Y, next.Y);
+                        lowerRight.X = Math.Max(lowerRight.X, next.X);
+                        lowerRight.Y = Math.Max(lowerRight.Y, next.Y);
+
+                        count++;
+                    }
+
+                    if (cutoff > 0 && count > cutoff)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            Image.UnlockBits(bmpData);
+
+            return new BlobCount() { PixelCount = count, BlobBounds = new Rectangle(upperLeft.X, upperLeft.Y, lowerRight.X - upperLeft.X, lowerRight.Y - upperLeft.Y) };
+        }
+
+        public void MeanShiftFilter(int iterations, int radius = 3, double tolerance = 5.0, bool ignorebkg = true)
+        {
+            try
+            {
+                BitmapData bmpData = Image.LockBits(new Rectangle(0, 0, Image.Width, Image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+                IntPtr Scan0 = bmpData.Scan0;
+
+                //Func<byte[], byte[], double> dist = (x, y) => Math.Sqrt(((x[0] - y[0]) * (x[0] - y[0]) + (x[0] - y[0]) * (x[0] - y[0]) + (x[0] - y[0]) * (x[0] - y[0])) / 3.0);
+                Func<byte, byte, byte, byte, byte, byte, double> dist = (a, b, c, x, y, z) => (new byte[] { a, b, c }).GetEDeltaColorDifference(new byte[] { x, y, z });
+
+                unsafe
+                {
+                    byte* p = (byte*)(void*)Scan0;
+                    int stride = bmpData.Stride;
+
+                    for (int iteration = 0; iteration < iterations; iteration++)
+                    {
+                        for (int x = 0; x < Image.Width - 1; x++)
+                        {
+                            for (int y = 0; y < Image.Height - 1; y++)
+                            {
+                                int indexCenter = y * stride + x * 4;
+
+                                int avgR = 0;
+                                int avgG = 0;
+                                int avgB = 0;
+                                int count = 0;
+
+                                for (int dx = -radius; dx <= radius; dx++)
+                                {
+                                    for (int dy = -radius; dy <= radius; dy++)
+                                    {
+                                        int newx = (dx + x + Image.Width) % Image.Width;
+                                        int newy = (dy + y + Image.Height) % Image.Height;
+
+                                        int index = newy * stride + newx * 4;
+
+                                        if (!ignorebkg || dist(p[index + 2], p[index + 1], p[index + 0], (byte)255, (byte)255, (byte)255) > tolerance)
+                                        {
+                                            if (dist(p[index + 2], p[index + 1], p[index + 0], p[indexCenter + 2], p[indexCenter + 1], p[indexCenter + 0]) < tolerance)
+                                            {
+                                                avgB += p[index];
+                                                avgG += p[index + 1];
+                                                avgR += p[index + 2];
+                                                count++;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Divide by the number of pixels looked at
+                                if (count > 0)
+                                {
+                                    avgR /= count;
+                                    avgG /= count;
+                                    avgB /= count;
+
+                                    p[indexCenter] = (byte)avgB;
+                                    p[indexCenter + 1] = (byte)avgG;
+                                    p[indexCenter + 2] = (byte)avgR;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Image.UnlockBits(bmpData);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error applying the Mean Shift Filter to the image", ex);
+            }
+        }
+
+        public void RemoveSmallBlobs(int minimumBlobSize, int minimumBlobWidth, int minimumBlobHeight, Color backgroundColor, int colorTolerance)
+        {
+            try
+            {
+                // This will prevent us from attempting to count a blob of N pixels N times (assuming N < minimumBlobSize, otherwise it would be filled)
+                bool[,] done = new bool[Image.Width, Image.Height];
+
+                for (int x = 0; x < Image.Width; x++)
+                {
+                    for (int y = 0; y < Image.Height; y++)
+                    {
+                        // Ignore the background
+                        if (!done[x, y] && Image.GetPixel(x, y).Subtract(backgroundColor) >= colorTolerance)
+                        {
+                            // See how big of a blob there is here
+                            BlobCount blob = FloodCount(new Point(x, y), colorTolerance, doneChecking: done);
+
+                            // If it's small enough, fill it with the background color
+                            if (blob.PixelCount < minimumBlobSize || blob.BlobBounds.Width < minimumBlobWidth || blob.BlobBounds.Height < minimumBlobHeight)
+                            {
+                                FloodFill(new Point(x, y), colorTolerance, backgroundColor);
+                                // DEBUG: Color.FromArgb(Math.Min(255, blob.PixelCount), Math.Min(255, blob.PixelCount), Math.Min(255, blob.PixelCount)));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error trying to remove small blobs from the image.", ex);
             }
         }
 
@@ -355,6 +514,24 @@ namespace BTCOnline
 
             return Math.Sqrt(Math.Pow(a.L - b.L, 2) + Math.Pow(a.a - b.a, 2) + Math.Pow(a.b - b.b, 2));
         }
+
+        public static int Subtract(this Color c, Color other)
+        {
+            return Math.Max(Math.Abs(c.R - other.R), Math.Max(Math.Abs(c.G - other.G), Math.Abs(c.B - other.B)));
+        }
+    }
+
+    public struct BlobCount
+    {
+        /// <summary>
+        /// Number of pixels in this blob
+        /// </summary>
+        public int PixelCount { get; set; }
+
+        /// <summary>
+        /// The bounding box of the blob found
+        /// </summary>
+        public Rectangle BlobBounds { get; set; }
     }
 
     public struct LAB // : IColor<LAB>
