@@ -1,0 +1,12 @@
+SetMode, all
+SetupSegmenter, BLOB, 4, 14, 4
+SETUPSOLVER, MNN, "0123456789+-", 20, 20, 4
+
+DefinePreconditions
+    Resize, 500, 80
+    ColorFillBlobs, 100, 60
+    BlackAndWhite
+    SAVESAMPLE, ttest.jpgg
+EndPreconditions
+
+Solve, %image%

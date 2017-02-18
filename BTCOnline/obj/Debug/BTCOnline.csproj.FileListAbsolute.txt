@@ -1,0 +1,15 @@
+c:\users\romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\BTCOnline.exe.config
+c:\users\romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\BTCOnline.exe
+c:\users\romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\BTCOnline.pdb
+c:\users\romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\obj\Debug\BTCOnline.csprojResolveAssemblyReference.cache
+c:\users\romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\obj\Debug\BTCOnline.exe
+c:\users\romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\obj\Debug\BTCOnline.pdb
+C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\WebDriver.dll
+C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\WebDriver.xml
+C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\x64\liblept172.dll
+C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\x64\libtesseract304.dll
+C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\x86\liblept172.dll
+C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\x86\libtesseract304.dll
+C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\Tesseract.dll
+C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\tessnet2_32.dll
+C:\Users\Romain\documents\visual studio 2015\Projects\BTCOnline\BTCOnline\bin\Debug\Tesseract.xml
